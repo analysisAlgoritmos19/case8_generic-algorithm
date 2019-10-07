@@ -14,55 +14,82 @@ def rgb2hex(r, g, b, a):
     return '#{:02x}{:02x}{:02x}{:02x}'.format(r, g, b, a)
 
 
+def find_near_rbg_value(p_rgb_dictionary, p_rgb, p_similarity):
+    for rgb_value_key in p_rgb_dictionary:
+        if color_distance(numpy.array(rgb_value_key), p_rgb) <= p_similarity:
+            return rgb_value_key
+    return 1
+
+
 def get_random_pixels(image, p_percentage_of_pixels):
     pix_val = list(image.getdata())
     width, height = image.size
     amount_pixels = int(len(pix_val) * (p_percentage_of_pixels / 100))
-    rgb_table = collections.Counter()
+    rgb_dictionary = {}
     rbg_white = [255, 255, 255]
-    listOfColors = []
-    for pixel_index in range(0, 1):
-        r, g, b, a = pix_val[randint(0, width*height+1)]
-        if color_distance(numpy.array([r, g, b]), rbg_white) > 50 :
+    for pixel_index in range(0, 3):
+        r, g, b, a = pix_val[randint(0, width * height + 1)]
+        search_rgb = numpy.array([r, g, b])
+        print("Este es mi search_rgb")
+        print(search_rgb)
+
+        if color_distance(search_rgb, rbg_white) > 50:  # valida si el rgb no es blanco, hasta aqui funciona
+
+            check_if_rgb_exist = find_near_rbg_value(rgb_dictionary, search_rgb, 50)
+
+            if check_if_rgb_exist != -1:  # el rbg no existe
+
+                rgb_dictionary[str(r + " " + g + " " + b)] = 1 / amount_pixels
+
+            else:
+                actual_value = rgb_dictionary.get(str(r + " " + g + " " + b))
+                print("Este es mi actual  value")
+                print(actual_value)
+                rgb_dictionary[str(r + " " + g + " " + b)] = actual_value + (1 / amount_pixels)
+
+    return print(rgb_dictionary)
+
+
+"""
             exist = False
             for i in listOfColors:
-                if(color_distance(numpy.array([r, g, b]), i) < 100):
-                    """print("################3")
+                if (color_distance(numpy.array([r, g, b]), i) < 100):
+                    print("################3")
                     print(numpy.array([r, g, b]))
                     print(i)
-                    print("################4")"""
+                    print("################4")
                     exist = True
                     rgb_table[str(i)] += 1
-                    #print(rgb_table[str(i)])
+                    # print(rgb_table[str(i)])
                     break
-            if(not exist):
-                #print("entro")
+            if (not exist):
+                # print("entro")
                 listOfColors.append(numpy.array([r, g, b]))
                 rgb_table[str(numpy.array([r, g, b]))] += 1
     print(rgb_table)
 
+    # print(listOfColors)
 
-    #print(listOfColors)
+    # if color_distance(numpy.array([r, g, b]), rbg_white) > 50 and str(r)+str(g)+str(b)+str(a) not in rgb_table :
+    #      rgb_table[str(r)+str(g)+str(b)+str(a)] = 1/amount_pixels"""
 
 
-     #"""if color_distance(numpy.array([r, g, b]), rbg_white) > 50 and str(r)+str(g)+str(b)+str(a) not in rgb_table :
-      #      rgb_table[str(r)+str(g)+str(b)+str(a)] = 1/amount_pixels"""
+# print(r, g, b)
+# print(color_distance(numpy.array([r, g, b]), rbg_white))
 
-       # print(r, g, b)
-        #print(color_distance(numpy.array([r, g, b]), rbg_white))
+
 def generate_probabilistic_quadrants(p_image):
     image = Image.open(p_image)
     width, height = image.size
     for horizon_coordinate in range(0, width, 256):
         for vert_coordinate in range(0, height, 256):
-            sub_image = image.crop((horizon_coordinate, vert_coordinate, horizon_coordinate+256, vert_coordinate+256))
+            sub_image = image.crop(
+                (horizon_coordinate, vert_coordinate, horizon_coordinate + 256, vert_coordinate + 256))
             get_random_pixels(sub_image, 60)
-
 
 
 if __name__ == '__main__':
     generate_probabilistic_quadrants("Luneos-logo-1024.png")
-
 
 """    def __init__(self, pCantPartitions):
 
