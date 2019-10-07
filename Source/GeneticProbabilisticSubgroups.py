@@ -13,7 +13,6 @@ from PruebaOrdenarColores import *
 
 from Source.PruebaOrdenarColores import ColorDistance
 
-
 class GenerateProbabilisticSubgroups:
     __cantPartitions: int
     __Subgroups = {}
