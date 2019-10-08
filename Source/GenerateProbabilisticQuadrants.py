@@ -3,10 +3,17 @@ from random import randint
 import numpy
 import collections
 
+def convert(obj):
+    for i in range(len(obj)):
+        obj[i] = int(obj[i])
+    return obj
 
 def color_distance(rgb1, rgb2):
     rgb_average = 0.5 * (rgb1[0] + rgb2[0])
-    distance = abs(sum((2 + rgb_average, 4, 3 - rgb_average) * pow(pow((rgb1 - rgb2), 2), 0.5)))
+    distance = sum((2+rgb_average,4,3-rgb_average)*(rgb1-rgb2)**2)**0.5
+    #print(rgb1)
+    #print(rgb2)
+    #print(distance)
     return distance
 
 
@@ -16,37 +23,38 @@ def rgb2hex(r, g, b, a):
 
 def find_near_rbg_value(p_rgb_dictionary, p_rgb, p_similarity):
     for rgb_value_key in p_rgb_dictionary:
-        if color_distance(numpy.array(rgb_value_key), p_rgb) <= p_similarity:
-            return rgb_value_key
-    return 1
-
+        originalkey = rgb_value_key
+        #print("Este es el rgb_value_key")
+        rgb_value_key = convert(rgb_value_key.split(","))
+        #print(rgb_value_key)
+        if color_distance(rgb_value_key, p_rgb) <= p_similarity:
+            return originalkey
+    return -1
 
 def get_random_pixels(image, p_percentage_of_pixels):
     pix_val = list(image.getdata())
     width, height = image.size
-    amount_pixels = int(len(pix_val) * (p_percentage_of_pixels / 100))
+    amount_pixels = int(len(pix_val) * (p_percentage_of_pixels / 1000))
     rgb_dictionary = {}
     rbg_white = [255, 255, 255]
-    for pixel_index in range(0, 3):
-        r, g, b, a = pix_val[randint(0, width * height + 1)]
+    for pixel_index in range(amount_pixels):
+        r, g, b, a = pix_val[randint(0, width*height - 1)]
         search_rgb = numpy.array([r, g, b])
-        print("Este es mi search_rgb")
-        print(search_rgb)
-
+        #print("Este es mi search_rgb")
+        #print(search_rgb)
+        key_rgb =str(r) + "," + str(g) + "," + str(b)
         if color_distance(search_rgb, rbg_white) > 50:  # valida si el rgb no es blanco, hasta aqui funciona
-
-            check_if_rgb_exist = find_near_rbg_value(rgb_dictionary, search_rgb, 50)
-
-            if check_if_rgb_exist != -1:  # el rbg no existe
-
-                rgb_dictionary[str(r + " " + g + " " + b)] = 1 / amount_pixels
-
+            check_if_rgb_exist = find_near_rbg_value(rgb_dictionary, search_rgb, 400)
+            #print(check_if_rgb_exist)
+            if check_if_rgb_exist == -1:  # el rbg no existe
+                #print(key_rgb)
+                rgb_dictionary[key_rgb] = 1 / amount_pixels
             else:
-                actual_value = rgb_dictionary.get(str(r + " " + g + " " + b))
-                print("Este es mi actual  value")
-                print(actual_value)
-                rgb_dictionary[str(r + " " + g + " " + b)] = actual_value + (1 / amount_pixels)
-
+                actual_value = rgb_dictionary.get(check_if_rgb_exist)
+                #print(actual_value)
+                # 3print("Este es mi actual  value")
+                # print(actual_value)
+                rgb_dictionary[check_if_rgb_exist] = actual_value + (1 / amount_pixels)
     return print(rgb_dictionary)
 
 
@@ -90,6 +98,10 @@ def generate_probabilistic_quadrants(p_image):
 
 if __name__ == '__main__':
     generate_probabilistic_quadrants("Luneos-logo-1024.png")
+    #color_distance(numpy.array([2,95,124]),numpy.array([40,170,237]))
+    #color_distance(numpy.array([0,141,214]), numpy.array([0,117,187]))
+    #color_distance(numpy.array([41,171,238]), numpy.array([58,181,248]))
+    #color_distance(numpy.array([188,225,255]), numpy.array([212,236,255]))
 
 """    def __init__(self, pCantPartitions):
 
