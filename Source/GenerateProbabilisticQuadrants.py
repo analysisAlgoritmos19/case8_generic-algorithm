@@ -1,8 +1,7 @@
-from math import sqrt
-
-from PIL import Image
 from random import randint
+from multiprocessing.dummy import Pool as ThreadPool
 import numpy
+from PIL import Image
 
 
 def convert_to_array(p_key):
@@ -53,11 +52,11 @@ def get_random_pixels(image, p_percentage_of_pixels):
 def generate_probabilistic_quadrants(p_image):
     image = Image.open(p_image)
     width, height = image.size
-    for horizon_coordinate in range(0, width, 256):
-        for vert_coordinate in range(0, height, 256):
+    for horizon_coordinate in range(0, width, 128):
+        for vert_coordinate in range(0, height, 128):
             sub_image = image.crop(
-                (horizon_coordinate, vert_coordinate, horizon_coordinate + 256, vert_coordinate + 256))
-            get_random_pixels(sub_image, 60)
+                (horizon_coordinate, vert_coordinate, horizon_coordinate + 128, vert_coordinate + 128))
+            get_random_pixels(sub_image, 25)
 
 
 if __name__ == '__main__':
