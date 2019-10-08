@@ -1,6 +1,7 @@
 from PIL import Image
 from random import randint
 import numpy
+import collections
 
 
 def color_distance(rgb1, rgb2):
@@ -17,12 +18,35 @@ def get_random_pixels(image, p_percentage_of_pixels):
     pix_val = list(image.getdata())
     width, height = image.size
     amount_pixels = int(len(pix_val) * (p_percentage_of_pixels / 100))
-    rgb_table = {}
+    rgb_table = collections.Counter()
     rbg_white = [255, 255, 255]
-    for pixel_index in range(0, 5):
+    listOfColors = []
+    for pixel_index in range(0, 1):
         r, g, b, a = pix_val[randint(0, width*height+1)]
-        if color_distance(numpy.array([r, g, b]), rbg_white) > 50 and str(r)+str(g)+str(b)+str(a) not in rgb_table :
-            rgb_table[str(r)+str(g)+str(b)+str(a)] = 1/amount_pixels
+        if color_distance(numpy.array([r, g, b]), rbg_white) > 50 :
+            exist = False
+            for i in listOfColors:
+                if(color_distance(numpy.array([r, g, b]), i) < 100):
+                    """print("################3")
+                    print(numpy.array([r, g, b]))
+                    print(i)
+                    print("################4")"""
+                    exist = True
+                    rgb_table[str(i)] += 1
+                    #print(rgb_table[str(i)])
+                    break
+            if(not exist):
+                #print("entro")
+                listOfColors.append(numpy.array([r, g, b]))
+                rgb_table[str(numpy.array([r, g, b]))] += 1
+    print(rgb_table)
+
+
+    #print(listOfColors)
+
+
+     #"""if color_distance(numpy.array([r, g, b]), rbg_white) > 50 and str(r)+str(g)+str(b)+str(a) not in rgb_table :
+      #      rgb_table[str(r)+str(g)+str(b)+str(a)] = 1/amount_pixels"""
 
        # print(r, g, b)
         #print(color_distance(numpy.array([r, g, b]), rbg_white))
