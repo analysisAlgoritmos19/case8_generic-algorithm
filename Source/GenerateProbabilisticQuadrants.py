@@ -39,8 +39,8 @@ def get_random_pixels(image, p_percentage_of_pixels):
                 #print("entro")
                 listOfColors.append(numpy.array([r, g, b]))
                 rgb_table[str(numpy.array([r, g, b]))] += 1
-    print(rgb_table)
 
+    print(rgb_table)
 
     #print(listOfColors)
 
