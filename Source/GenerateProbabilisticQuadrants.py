@@ -31,6 +31,7 @@ def find_near_rbg_value(p_rgb_dictionary, p_rgb, p_similarity):
             return originalkey
     return -1
 
+
 def get_random_pixels(image, p_percentage_of_pixels):
     pix_val = list(image.getdata())
     width, height = image.size
@@ -77,14 +78,15 @@ def get_random_pixels(image, p_percentage_of_pixels):
     print(rgb_table)
 
     # print(listOfColors)
+<<<<<<< HEAD
 
     # if color_distance(numpy.array([r, g, b]), rbg_white) > 50 and str(r)+str(g)+str(b)+str(a) not in rgb_table :
     #      rgb_table[str(r)+str(g)+str(b)+str(a)] = 1/amount_pixels"""
 
 
+
 # print(r, g, b)
 # print(color_distance(numpy.array([r, g, b]), rbg_white))
-
 
 def generate_probabilistic_quadrants(p_image):
     image = Image.open(p_image)
@@ -102,7 +104,6 @@ if __name__ == '__main__':
     #color_distance(numpy.array([0,141,214]), numpy.array([0,117,187]))
     #color_distance(numpy.array([41,171,238]), numpy.array([58,181,248]))
     #color_distance(numpy.array([188,225,255]), numpy.array([212,236,255]))
-
 """    def __init__(self, pCantPartitions):
 
         self.__subgroups = {"rojo": []}
