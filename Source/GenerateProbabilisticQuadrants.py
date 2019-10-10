@@ -1,5 +1,5 @@
 from random import randint
-from multiprocessing.dummy import Pool as ThreadPool
+import random
 import numpy
 from PIL import Image
 
@@ -39,14 +39,44 @@ def get_random_pixels(image, p_percentage_of_pixels):
         r, g, b = pix_val[randint(0, width * height - 1)]
         search_rgb = numpy.array([r, g, b])
         key_rgb = str(r) + "," + str(g) + "," + str(b)
-        if color_distance(search_rgb, rbg_white) > 400:
+        if color_distance(search_rgb, rbg_white) > 600:
             check_if_rgb_exist = find_near_rbg_value(rgb_dictionary, search_rgb, 2000)
             if check_if_rgb_exist == -1:
                 rgb_dictionary[key_rgb] = 1 / amount_pixels
             else:
                 actual_value = rgb_dictionary.get(check_if_rgb_exist)
                 rgb_dictionary[check_if_rgb_exist] = actual_value + (1 / amount_pixels)
-    return print(rgb_dictionary)
+    return rgb_dictionary
+
+
+def merge_dictionaries(dictionary1, dictionary2):
+    return {k: dictionary1.get(k, 0) + dictionary2.get(k, 0) for k in set(dictionary1) | set(dictionary2)}
+
+
+def check_quadrant(p_sub_image, p_amount_of_checks):
+    probability_of_check = 1
+    result = {}
+    print("Vamos a verificar imagen")
+    for prob_check in range(p_amount_of_checks):
+        if random.random() <= probability_of_check:
+            print('Entro a verificar')
+            colors_dict = get_random_pixels(p_sub_image, 5)
+            result = merge_dictionaries(result, colors_dict)
+            if not colors_dict:
+                probability_of_check -= 1 / p_amount_of_checks
+    print(probability_of_check)
+    print(result)
+
+
+
+
+
+
+
+
+
+
+
 
 
 def generate_probabilistic_quadrants(p_image):
@@ -56,7 +86,8 @@ def generate_probabilistic_quadrants(p_image):
         for vert_coordinate in range(0, height, 128):
             sub_image = image.crop(
                 (horizon_coordinate, vert_coordinate, horizon_coordinate + 128, vert_coordinate + 128))
-            get_random_pixels(sub_image, 25)
+            check_quadrant(sub_image,5)
+            #get_random_pixels(sub_image, 25)
 
 
 if __name__ == '__main__':
