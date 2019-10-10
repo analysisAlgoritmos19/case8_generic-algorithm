@@ -58,7 +58,8 @@ def check_quadrant(p_sub_image, p_amount_of_checks):
     result = {}
     print("Vamos a verificar imagen")
     for prob_check in range(p_amount_of_checks):
-        if random.random() <= probability_of_check:
+        flip_the_coin = random.random()
+        if flip_the_coin <= probability_of_check:
             print('Entro a verificar')
             colors_dict = get_random_pixels(p_sub_image, 5)
             result = merge_dictionaries(result, colors_dict)
@@ -68,17 +69,6 @@ def check_quadrant(p_sub_image, p_amount_of_checks):
     print(result)
 
 
-
-
-
-
-
-
-
-
-
-
-
 def generate_probabilistic_quadrants(p_image):
     image = Image.open(p_image)
     width, height = image.size
@@ -86,8 +76,7 @@ def generate_probabilistic_quadrants(p_image):
         for vert_coordinate in range(0, height, 128):
             sub_image = image.crop(
                 (horizon_coordinate, vert_coordinate, horizon_coordinate + 128, vert_coordinate + 128))
-            check_quadrant(sub_image,5)
-            #get_random_pixels(sub_image, 25)
+            check_quadrant(sub_image, 5)
 
 
 if __name__ == '__main__':
