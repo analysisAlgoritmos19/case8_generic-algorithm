@@ -2,6 +2,9 @@ from random import randint
 import random
 import numpy
 from PIL import Image
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
 
 
 def convert_to_array(p_key):
@@ -10,10 +13,27 @@ def convert_to_array(p_key):
     return p_key
 
 
+def color_distance_delta(rgb1, rgb2):
+    r1, g1, b1 = rgb1
+    r2, g2, b2 = rgb2
+    color1_rgb = sRGBColor(r1, g1, b1)
+    color2_rgb = sRGBColor(r2, g2, b2)
+    # Convert from RGB to Lab Color Space
+    color1_lab = convert_color(color1_rgb, LabColor)
+    # Convert from RGB to Lab Color Space
+    color2_lab = convert_color(color2_rgb, LabColor)
+    # Find the color difference
+    delta_e = delta_e_cie2000(color1_lab, color2_lab)
+    return delta_e
+
+
+"""
+
 def color_distance(rgb1, rgb2):
     rgb_average = (rgb1[0] + rgb2[0]) / 2
     distance = abs(sum((2 + rgb_average, 4, 3 - rgb_average) * numpy.sqrt((pow((rgb1 - rgb2), 2)))))
     return distance
+"""
 
 
 def rgb2hex(r, g, b, a):
@@ -24,46 +44,47 @@ def find_near_rbg_value(p_rgb_dictionary, p_rgb, p_similarity):
     for rgb_value_key in p_rgb_dictionary:
         original_key = rgb_value_key
         rgb_value_key = convert_to_array(rgb_value_key.split(","))
-        if color_distance(rgb_value_key, p_rgb) <= p_similarity:
+        if color_distance_delta(rgb_value_key, p_rgb) <= p_similarity:
             return original_key
     return -1
 
 
-def get_random_pixels(image, p_percentage_of_pixels):
+def get_random_pixels(image, p_percentage_of_pixels, rbg_dictionary):
     pix_val = list(image.getdata())
+    entered = False
     width, height = image.size
     amount_pixels = int(len(pix_val) * (p_percentage_of_pixels / 100))
-    rgb_dictionary = {}
     rbg_white = [255, 255, 255]
-    for pixel_index in range(amount_pixels+1):
+    for pixel_index in range(amount_pixels):
         r, g, b = pix_val[randint(0, width * height - 1)]
         search_rgb = numpy.array([r, g, b])
         key_rgb = str(r) + "," + str(g) + "," + str(b)
-        if color_distance(search_rgb, rbg_white) > 600:
-            check_if_rgb_exist = find_near_rbg_value(rgb_dictionary, search_rgb, 2000)
+        if color_distance_delta(search_rgb, rbg_white) > 40:
+            entered = True
+            check_if_rgb_exist = find_near_rbg_value(rbg_dictionary, search_rgb, 100)  # distance of search
             if check_if_rgb_exist == -1:
-                rgb_dictionary[key_rgb] = 1 / amount_pixels
+                rbg_dictionary[key_rgb] = 1 / (amount_pixels * 5)  # pixel not found, enter new value and key
             else:
-                actual_value = rgb_dictionary.get(check_if_rgb_exist)
-                rgb_dictionary[check_if_rgb_exist] = actual_value + (1 / amount_pixels)
-    return rgb_dictionary
+                actual_value = rbg_dictionary.get(check_if_rgb_exist)
+                rbg_dictionary[check_if_rgb_exist] = actual_value + (1 / (amount_pixels * 5))
+    return rbg_dictionary, entered
 
+
+"""
 
 def merge_dictionaries(dictionary1, dictionary2):
     return {k: dictionary1.get(k, 0) + dictionary2.get(k, 0) for k in set(dictionary1) | set(dictionary2)}
+"""
 
 
 def check_quadrant(p_sub_image, p_amount_of_checks):
     probability_of_check = 1
     result = {}
-    print("Vamos a verificar imagen")
     for prob_check in range(p_amount_of_checks):
         flip_the_coin = random.random()
         if flip_the_coin <= probability_of_check:
-            print('Entro a verificar')
-            colors_dict = get_random_pixels(p_sub_image, 5)
-            result = merge_dictionaries(result, colors_dict)
-            if not colors_dict:
+            result, entered = get_random_pixels(p_sub_image, 5, result)  # 25% of total pixels in quadrant 5% per check
+            if not entered:
                 probability_of_check -= 1 / p_amount_of_checks
     print(probability_of_check)
     print(result)
@@ -76,7 +97,7 @@ def generate_probabilistic_quadrants(p_image):
         for vert_coordinate in range(0, height, 128):
             sub_image = image.crop(
                 (horizon_coordinate, vert_coordinate, horizon_coordinate + 128, vert_coordinate + 128))
-            check_quadrant(sub_image, 5)
+            check_quadrant(sub_image, 5)  # amount of checks
 
 
 if __name__ == '__main__':
