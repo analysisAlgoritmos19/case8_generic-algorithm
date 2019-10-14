@@ -1,7 +1,9 @@
+import os
 from random import randint
 import random
 import numpy
-from PIL import Image
+from pathlib import Path
+from Source.SubImage import SubImage
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
@@ -20,22 +22,10 @@ def color_distance_delta(rgb1, rgb2):
     r2, g2, b2 = rgb2
     color1_rgb = sRGBColor(r1, g1, b1)
     color2_rgb = sRGBColor(r2, g2, b2)
-    # Convert from RGB to Lab Color Space
     color1_lab = convert_color(color1_rgb, LabColor)
-    # Convert from RGB to Lab Color Space
     color2_lab = convert_color(color2_rgb, LabColor)
-    # Find the color difference
     delta_e = delta_e_cie2000(color1_lab, color2_lab)
     return delta_e
-
-
-"""
-
-def color_distance(rgb1, rgb2):
-    rgb_average = (rgb1[0] + rgb2[0]) / 2
-    distance = abs(sum((2 + rgb_average, 4, 3 - rgb_average) * numpy.sqrt((pow((rgb1 - rgb2), 2)))))
-    return distance
-"""
 
 
 def rgb2hex(r, g, b, a):
@@ -72,25 +62,22 @@ def get_random_pixels(image, p_percentage_of_pixels, rbg_dictionary):
     return rbg_dictionary, entered
 
 
-"""
-
-def merge_dictionaries(dictionary1, dictionary2):
-    return {k: dictionary1.get(k, 0) + dictionary2.get(k, 0) for k in set(dictionary1) | set(dictionary2)}
-"""
-
-
-def check_quadrant(p_sub_image):
+def check_quadrant(p_sub_image_object):
+    percentage_to_check = 25
+    amount_of_checks = 5
     probability_of_check = 1
     result = {}
-    for prob_check in range(5):
+    for prob_check in range(amount_of_checks):
         flip_the_coin = random.random()
         if flip_the_coin <= probability_of_check:
-            result, entered = get_random_pixels(p_sub_image, 5, result)  # 25% of total pixels in quadrant 5% per check
+            result, entered = get_random_pixels(p_sub_image_object.subImage, percentage_to_check / amount_of_checks,
+                                                result)
+            # 25% of total pixels in quadrant 5% # per check
             if not entered:
                 probability_of_check -= 1 / 5
-    # print(probability_of_check)
-    # print(result)
-    return result
+    p_sub_image_object.dictionary = result
+
+    return p_sub_image_object
 
 
 def generate_probabilistic_quadrants(p_image):
@@ -99,21 +86,20 @@ def generate_probabilistic_quadrants(p_image):
     sub_images = list()
     for horizon_coordinate in range(0, width, 128):
         for vert_coordinate in range(0, height, 128):
-            sub_image = image.crop(
-                (horizon_coordinate, vert_coordinate, horizon_coordinate + 128, vert_coordinate + 128))
+            x_min = horizon_coordinate
+            x_max = horizon_coordinate + 128
+            y_min = vert_coordinate
+            y_max = vert_coordinate + 128
+            coordinates = [x_min, y_min, x_max, y_max]
+            sub_image_crop = image.crop((x_min, y_min, x_max, y_max))
+            sub_image = SubImage(sub_image_crop, coordinates, {})
             sub_images.append(sub_image)
-            # check_quadrant(sub_image, 5)  # amount of checks
     pool = Pool(15)
     pool_var = pool.map(check_quadrant, sub_images)
     pool.close()
     pool.join()
-    print(pool_var)
+    print(len(pool_var))
 
 
 if __name__ == '__main__':
-    generate_probabilistic_quadrants("mickey.jpeg")
-
-    # color_distance(numpy.array([2,95,124]),numpy.array([40,170,237]))
-    # color_distance(numpy.array([0,141,214]), numpy.array([0,117,187]))
-    # color_distance(numpy.array([41,171,238]), numpy.array([58,181,248]))
-    # color_distance(numpy.array([188,225,255]), numpy.array([212,236,255]))
+    generate_probabilistic_quadrants("../Resources/mickey.jpeg")
