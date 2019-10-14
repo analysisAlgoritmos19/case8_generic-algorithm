@@ -5,6 +5,8 @@ from PIL import Image
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
+from multiprocessing import Pool
+from PIL import Image
 
 
 def convert_to_array(p_key):
@@ -59,7 +61,7 @@ def get_random_pixels(image, p_percentage_of_pixels, rbg_dictionary):
         r, g, b = pix_val[randint(0, width * height - 1)]
         search_rgb = numpy.array([r, g, b])
         key_rgb = str(r) + "," + str(g) + "," + str(b)
-        if color_distance_delta(search_rgb, rbg_white) > 40:
+        if color_distance_delta(search_rgb, rbg_white) > 20:
             entered = True
             check_if_rgb_exist = find_near_rbg_value(rbg_dictionary, search_rgb, 100)  # distance of search
             if check_if_rgb_exist == -1:
@@ -77,27 +79,35 @@ def merge_dictionaries(dictionary1, dictionary2):
 """
 
 
-def check_quadrant(p_sub_image, p_amount_of_checks):
+def check_quadrant(p_sub_image):
     probability_of_check = 1
     result = {}
-    for prob_check in range(p_amount_of_checks):
+    for prob_check in range(5):
         flip_the_coin = random.random()
         if flip_the_coin <= probability_of_check:
             result, entered = get_random_pixels(p_sub_image, 5, result)  # 25% of total pixels in quadrant 5% per check
             if not entered:
-                probability_of_check -= 1 / p_amount_of_checks
-    print(probability_of_check)
-    print(result)
+                probability_of_check -= 1 / 5
+    # print(probability_of_check)
+    # print(result)
+    return result
 
 
 def generate_probabilistic_quadrants(p_image):
     image = Image.open(p_image)
     width, height = image.size
+    sub_images = list()
     for horizon_coordinate in range(0, width, 128):
         for vert_coordinate in range(0, height, 128):
             sub_image = image.crop(
                 (horizon_coordinate, vert_coordinate, horizon_coordinate + 128, vert_coordinate + 128))
-            check_quadrant(sub_image, 5)  # amount of checks
+            sub_images.append(sub_image)
+            # check_quadrant(sub_image, 5)  # amount of checks
+    pool = Pool(15)
+    pool_var = pool.map(check_quadrant, sub_images)
+    pool.close()
+    pool.join()
+    print(pool_var)
 
 
 if __name__ == '__main__':
