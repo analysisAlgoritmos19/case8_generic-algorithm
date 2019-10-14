@@ -3,12 +3,12 @@ import random
 
 class Polygon:
 
-    #Convertir bin en int(aqui iria el adn,2)
+    # Convertir bin en int(aqui iria el adn,2)
 
-    def __init__(self, adn, rgbColor, lenght):
+    def __init__(self, adn):
         self.__adn = adn
-        self.__rgb_Color = rgbColor
-        self.__point = (random.randint(lenght),random.randint(lenght))
+        self.__rgb_Color = ""
+        self.__point = ()
 
     def get_adn(self):
         return self.__adn
@@ -22,4 +22,5 @@ class Polygon:
     def set_color(self, p_rgb_Color):
         self.__rgb_Color = p_rgb_Color
 
-
+    def get_point(self, lenght):
+        self.__point = (random.randint(lenght), random.randint(lenght))
