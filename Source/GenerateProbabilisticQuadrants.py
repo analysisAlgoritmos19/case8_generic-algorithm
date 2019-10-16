@@ -1,5 +1,4 @@
 from random import randint
-import random
 import numpy
 from Source.SubImage import SubImage
 from colormath.color_objects import sRGBColor, LabColor
@@ -7,6 +6,7 @@ from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 from multiprocessing import Pool
 from PIL import Image
+from Genetic.Genetic import *
 
 
 def convert_to_array(p_key):
@@ -49,7 +49,7 @@ def get_random_pixels(image, p_percentage_of_pixels, rbg_dictionary):
         r, g, b = pix_val[randint(0, width * height - 1)]
         search_rgb = numpy.array([r, g, b])
         key_rgb = str(r) + "," + str(g) + "," + str(b)
-        if color_distance_delta(search_rgb, rbg_white) > 20:
+        if color_distance_delta(search_rgb, rbg_white) >= 20:
             entered = True
             check_if_rgb_exist = find_near_rbg_value(rbg_dictionary, search_rgb, 100)  # distance of search
             if check_if_rgb_exist == -1:
@@ -57,6 +57,7 @@ def get_random_pixels(image, p_percentage_of_pixels, rbg_dictionary):
             else:
                 actual_value = rbg_dictionary.get(check_if_rgb_exist)
                 rbg_dictionary[check_if_rgb_exist] = actual_value + (1 / (amount_pixels * 5))
+
     return rbg_dictionary, entered
 
 
@@ -92,12 +93,21 @@ def generate_probabilistic_quadrants(p_image):
             sub_image_crop = image.crop((x_min, y_min, x_max, y_max))
             sub_image = SubImage(sub_image_crop, coordinates, {})
             sub_images.append(sub_image)
-    pool = Pool(15)
-    pool_var = pool.map(check_quadrant, sub_images)
+    processes_result = execute_in_processes(check_quadrant, sub_images, 15)
+    return processes_result
+
+
+def check_for_empty_quadrants(sub_images_list):
+    not_empty_quadrant = []
+    for sub_image_index in sub_images_list:
+        if bool(sub_image_index.dictionary):
+            not_empty_quadrant.append(sub_image_index)
+    return not_empty_quadrant
+
+
+def execute_in_processes(function, iterable, amount_of_processes):
+    pool = Pool(amount_of_processes)
+    pool_var = pool.map(function, iterable)
     pool.close()
     pool.join()
-    print(len(pool_var))
-
-
-if __name__ == '__main__':
-    generate_probabilistic_quadrants("../Resources/mickey.jpeg")
+    return pool_var
