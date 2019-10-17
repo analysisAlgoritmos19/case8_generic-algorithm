@@ -83,12 +83,12 @@ def generate_probabilistic_quadrants(p_image):
     image = Image.open(p_image)
     width, height = image.size
     sub_images = list()
-    for horizon_coordinate in range(0, width, 128):
-        for vert_coordinate in range(0, height, 128):
+    for horizon_coordinate in range(0, width, 8):
+        for vert_coordinate in range(0, height, 8):
             x_min = horizon_coordinate
-            x_max = horizon_coordinate + 128
+            x_max = horizon_coordinate + 8
             y_min = vert_coordinate
-            y_max = vert_coordinate + 128
+            y_max = vert_coordinate + 8
             coordinates = [x_min, y_min, x_max, y_max]
             sub_image_crop = image.crop((x_min, y_min, x_max, y_max))
             sub_image = SubImage(sub_image_crop, coordinates, {})

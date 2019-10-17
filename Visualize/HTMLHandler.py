@@ -1,35 +1,24 @@
-from bs4 import BeautifulSoup as Soup
+
+svgStringGrande = '<!DOCTYPE html>\n' + '<html>\n' + '<body>\n' + "<script>\nfunction timedRefresh(timeoutPeriod) {\n"
+svgStringGrande += "setTimeout('location.reload(true);',timeoutPeriod);\n}" + "window.onload = timedRefresh(3000);\n"
+svgStringGrande += "</script>\n" + '<svg height = "1024" width = "1024">\n'
 
 
-def write_polygon(string):
-    file = open('index.html')
-    soup = Soup(file, "html.parser")
-    polygons = soup.find('svg')
-    convert_string = Soup(string, 'html.parser')
-    polygons.append(convert_string)
-    with open('index.html', "wb") as file:
-        file.write(soup.prettify("utf-8"))
-    file.close()
+def take_SVG(polygon):
+    global svgStringGrande
+    svgString = "<polygon points= " + '"'
+    for coordinate in polygon.coordinates:
+        svgString += str(coordinate[0]) + "," + str(coordinate[1]) + " "
+    svgString += '" style =' + '" fill: rgb(' + str(polygon.rgb_Color) + ')"/>'
+    svgStringGrande = svgStringGrande + svgString + "\n"
 
 
-def reset_html():
-
-    file = open('index.html')
-    soup = Soup(file, "html.parser")
-    soup.svg.decompose()
-    new_svg = soup.new_tag('svg')
-    new_svg['class'] = "polyImage"
-    new_svg['data-name'] = "Layer 1"
-    new_svg['viewbox'] = "0 0 1024 1024"
-    html = soup.find('html')
-    html.append(new_svg)
-    with open('index.html', "wb") as file:
-        file.write(soup.prettify("utf-8"))
-    file.close()
-
-def make_polygons_svg(lists_of_polygons):
-    for generation in lists_of_polygons:
-        string = ""
-        for polygon in generation:
-            string += str("< polygon points = " + str(0,128) + str(258,137.5) + str(258,262.5) + str(150,325) + str(42,262.6) + str(42,137.5) + "fill = rgbs" + str(200,5,20) +" > < / polygon > ")
+def finish_SVG():
+    global svgStringGrande
+    svgStringGrande = svgStringGrande + '</svg>\n' + '</body>\n' + '</html>\n'
+    with open("index" + ".html", "w") as file:
+        file.write(svgStringGrande)
+    svgStringGrande = '<!DOCTYPE html>\n' + '<html>\n' + '<body>\n' + "<script>\nfunction timedRefresh(timeoutPeriod) {\n"
+    svgStringGrande += "setTimeout('location.reload(true);',timeoutPeriod);\n}" + "window.onload = timedRefresh(3000);\n"
+    svgStringGrande += "</script>\n" + '<svg height = "1024" width = "1024">\n'
 

@@ -3,21 +3,21 @@ from Genetic.Polygon import Polygon
 from Source.GenerateProbabilisticQuadrants import execute_in_processes
 
 
-def convert_bin_to_dec(p_bin_num):  # working
+def convert_bin_to_dec(p_bin_num):
     return int(p_bin_num, 2)
 
 
-def convert_dec_to_bin(p_dec_num):    # working
+def convert_dec_to_bin(p_dec_num):
     return '{0:016b}'.format(p_dec_num)
 
 
-def create_new_polygon(p_adn_polygon, p_sub_image):  # working
+def create_new_polygon(p_adn_polygon, p_sub_image):
     polygon_rbg_value = get_rbg_range(p_adn_polygon, p_sub_image.dictionary)
     points = get_random_coordinates(p_sub_image)
     return Polygon(p_adn_polygon, polygon_rbg_value, points)
 
 
-def generate_initial_population(p_amount_of_polygons, p_sub_image):  # working
+def generate_initial_population(p_amount_of_polygons, p_sub_image):
     population = []
     p_sub_image.dictionary = fix_rgb_table_white(p_sub_image.dictionary)
     for polygon_index in range(p_amount_of_polygons):
@@ -39,7 +39,7 @@ def group_polygons_by_color(p_population):
     return individuals_by_color
 
 
-def get_random_coordinates(p_sub_image):  # working
+def get_random_coordinates(p_sub_image):
     amount_of_points = random.randint(3, 8)
     points = []
     for amount_points in range(amount_of_points):
@@ -49,7 +49,7 @@ def get_random_coordinates(p_sub_image):  # working
     return points
 
 
-def fix_rgb_table_white(p_rbg_table):  # working
+def fix_rgb_table_white(p_rbg_table):
     partial_percentage = 0
     for rgb_index in p_rbg_table:
         partial_percentage += p_rbg_table[rgb_index]
@@ -58,7 +58,7 @@ def fix_rgb_table_white(p_rbg_table):  # working
     return p_rbg_table
 
 
-def get_rbg_range(p_polygon_adn, p_rbg_table):  # working
+def get_rbg_range(p_polygon_adn, p_rbg_table):
     accumulator = 0
     for rgb in p_rbg_table:
         top_range = (p_rbg_table[rgb] * 65535) + accumulator
@@ -67,7 +67,7 @@ def get_rbg_range(p_polygon_adn, p_rbg_table):  # working
             return rgb
 
 
-def crossover(polygon1, polygon2, p_population, p_sub_image):
+def crossover(polygon1, polygon2, p_sub_image):
     crossing_point = random.randint(0, 16)
     new_adn = polygon1.adn[0:crossing_point]
     new_adn += polygon2.adn[crossing_point:len(polygon2.adn)]
@@ -97,10 +97,7 @@ def colors_for_reproduction(p_sub_image, p_population_by_color, p_population):
 
 
 def selection_by_color(p_polygons_of_color, p_colors_to_reproduction, p_population, p_sub_image):
-    #print(p_polygons_of_color)
-    #print(p_colors_to_reproduction)
     for color in p_colors_to_reproduction:
-        #print(color)
         list_of_polygons = p_polygons_of_color[color]
         if len(list_of_polygons) == 1:
             mutated_adn = mutation(list_of_polygons[0].adn)
@@ -114,7 +111,7 @@ def selection_by_color(p_polygons_of_color, p_colors_to_reproduction, p_populati
                     probability_of_reproduction = 1 / len(list_of_polygons)
                     polygon_of_color_1 = list_of_polygons[random.randint(0, len(list_of_polygons)-1)]
                     polygon_of_color_2 = list_of_polygons[random.randint(0, len(list_of_polygons)-1)]
-                    baby = crossover(polygon_of_color_1, polygon_of_color_2, p_population, p_sub_image)
+                    baby = crossover(polygon_of_color_1, polygon_of_color_2, p_sub_image)
                     if random.random() < probability_of_mutation:
                         baby_mutated_adn = mutation(baby.adn)
                         baby_mutated = create_new_polygon(baby_mutated_adn, p_sub_image)
@@ -131,7 +128,7 @@ def selection_by_color(p_polygons_of_color, p_colors_to_reproduction, p_populati
 
 def make_genetic(p_sub_image):
     population = generate_initial_population(10, p_sub_image)
-    for gen in range(100):
+    for gen in range(10):
         population_by_color = group_polygons_by_color(population)
         colors_fitness = colors_for_reproduction(p_sub_image, population_by_color, population)
         population = selection_by_color(population_by_color, colors_fitness, population, p_sub_image)
